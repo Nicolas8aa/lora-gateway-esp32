@@ -1,5 +1,4 @@
 #include <WiFi.h>
-#include "ESPAsyncWebServer.h"
 
 #include <LittleFS.h>
 #include <SPI.h>
@@ -33,8 +32,6 @@ String loRaMessage;
 String humidity;
 String incoming;
 
-// Web server on port 80
-AsyncWebServer server(80);
 
 // Get time from NTP
 void getTimeStamp() {
@@ -150,29 +147,6 @@ void setup() {
   startLoRa();
   connectWiFi();
 
-  if (!LittleFS.begin()) {
-    Serial.println("Failed to mount LittleFS");
-    return;
-  }
-
-  server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
-    request->send(LittleFS, "/index.html", String(), false, processor);
-  });
-  server.on("/humidity", HTTP_GET, [](AsyncWebServerRequest *request) {
-    request->send(200, "text/plain", humidity.c_str());
-  });
-  server.on("/timestamp", HTTP_GET, [](AsyncWebServerRequest *request) {
-    request->send(200, "text/plain", timestamp.c_str());
-  });
-  server.on("/rssi", HTTP_GET, [](AsyncWebServerRequest *request) {
-    request->send(200, "text/plain", String(rssi).c_str());
-  });
-
-  server.on("/winter", HTTP_GET, [](AsyncWebServerRequest *request) {
-    request->send(LittleFS, "/winter.jpg", "image/jpg");
-  });
-
-  server.begin();
 
   timeClient.begin();
   timeClient.setTimeOffset(-18000);  // Adjust for your time zone if needed
